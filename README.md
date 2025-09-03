@@ -24,7 +24,7 @@ A **Discord bot** that fetches Minecraft server information, including players o
 1. **Clone the repository**
 
 ```bash
-git clone https://github.com/yourusername/minecraft-server-discord-bot.git
+git clone https://github.com/Vesteria-Coding/Minecraft-Server-Info-Discord-Bot.git
 cd minecraft-server-discord-bot
 pip install -r requirements.txt
 python Bot.py
