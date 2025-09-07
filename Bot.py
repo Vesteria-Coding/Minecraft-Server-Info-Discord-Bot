@@ -30,7 +30,7 @@ async def ping(interaction: discord.Interaction):
     await interaction.response.send_message(f'Pong! `{latency:.2f}ms`', ephemeral=True)
 
 @tree.command(name="info", description="sends server info", guild=discord.Object(id=GUILD_ID))
-async def info_command(interaction: discord.Interaction):
+async def get_sever_info(interaction: discord.Interaction):
     await interaction.response.defer()
     try:
         url = f"https://api.mcsrvstat.us/2/{MINECRAFT_SERVER_IP}"
@@ -64,7 +64,7 @@ async def info_command(interaction: discord.Interaction):
     if overflown_usernames_count > 0:
         shortened_list += f'+{overflown_usernames_count} other people, '
 
-    async def info(interaction: discord.Interaction):
+    async def info_command(interaction: discord.Interaction):
         if online is True:
             embed = discord.Embed(title="Server Info", color=discord.Color.dark_green())
         elif online is False:
