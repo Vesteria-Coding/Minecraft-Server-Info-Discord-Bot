@@ -30,7 +30,7 @@ async def ping(interaction: discord.Interaction):
     await interaction.response.send_message(f'Pong! `{latency:.2f}ms`', ephemeral=True)
 
 @tree.command(name="info", description="sends server info", guild=discord.Object(id=GUILD_ID))
-async def ping(interaction: discord.Interaction):
+async def info_command(interaction: discord.Interaction):
     await interaction.response.defer()
     try:
         url = f"https://api.mcsrvstat.us/2/{MINECRAFT_SERVER_IP}"
@@ -52,12 +52,17 @@ async def ping(interaction: discord.Interaction):
     base64_string = data["icon"].split(",")[1]
     with open("server_icon.png", "wb") as image_file:
         image_file.write(base64.b64decode(base64_string))
+    shortened_list = ''
+    overflown_usernames_count = 0
 
-    # Check to see if player list is too BIG
-    total_charcters = 0
     for player in player_list:
-        for charcter in player:
-            total_charcters += 1
+        if (len(player) + len(shortened_list) + len(player) * 1.5) < 2000:
+            shortened_list += f'{player}, '
+        else:
+            overflown_usernames_count += 1
+
+    if overflown_usernames_count > 0:
+        shortened_list += f'+{overflown_usernames_count} other people, '
 
     async def info(interaction: discord.Interaction):
         if online is True:
@@ -68,11 +73,7 @@ async def ping(interaction: discord.Interaction):
             embed = discord.Embed(title="Server Info", color=discord.Color.light_gray())
         embed.set_thumbnail(url="attachment://server_icon.png")
         embed.add_field(name="Players", value=f"{players_online}/{players_max}", inline=False)
-        embed_charcters = (len(embed) * 1.15 + total_charcters)
-        if embed_charcters < 2000:
-            embed.add_field(name="Player List:", value=f"{', '.join(player_list)}", inline=False)
-        else:
-            print('error') # Add the list of players untill it is near 2000 charcter plus at the end +X about of players left over
+        embed.add_field(name="Player List:", value=shortened_list[0:-2], inline=False)
 
         if online is True:
             embed.set_footer(text="Online 🟢")
