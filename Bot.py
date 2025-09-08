@@ -44,9 +44,9 @@ async def get_sever_info(interaction: discord.Interaction):
     online = data.get("online")
 
     # Players
-    players_online = data.get("players", {}).get("online", 0)
-    players_max = data.get("players", {}).get("max", 0)
     player_list = data.get("players", {}).get("list", [])
+    players_online = len(player_list)
+    players_max = data.get("players", {}).get("max", 0)
 
     # Download and decord thumbnail
     base64_string = data["icon"].split(",")[1]
@@ -56,7 +56,7 @@ async def get_sever_info(interaction: discord.Interaction):
     overflown_usernames_count = 0
 
     for player in player_list:
-        if (len(player) + len(shortened_list) + len(player) * 1.5) < 2000:
+        if (len(player) + len(shortened_list)) < 1800:
             shortened_list += f'{player}, '
         else:
             overflown_usernames_count += 1
@@ -83,7 +83,7 @@ async def get_sever_info(interaction: discord.Interaction):
             embed.set_footer(text="Error Getting Status")
         file = File("server_icon.png", filename="server_icon.png")
         await interaction.followup.send(embed=embed, file=file)
-    await info(interaction)
+    await info_command(interaction)
     os.remove('server_icon.png')
 
 client.run(BOT_TOKEN)
