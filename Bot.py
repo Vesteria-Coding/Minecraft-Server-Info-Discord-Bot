@@ -1,9 +1,12 @@
 import os
+import json
 import base64
+import asyncio
 import discord
 import requests
 import argparse
 import time as t
+from discord.ext import tasks
 from dotenv import load_dotenv, dotenv_values
 from discord import app_commands, Interaction, Embed, File
 
@@ -18,10 +21,51 @@ intents = discord.Intents.all()
 client = discord.Client(intents=intents)
 tree = discord.app_commands.CommandTree(client)
 
+def get_watchlist():
+    if not os.path.exists(WHATCHLIST_FILE):
+        return {}
+    else:
+        with open(WHATCHLIST_FILE, 'r') as f:
+            return json.load(f)
+
+def save_watchlist(watchlist):
+    with open(WHATCHLIST_FILE, "w") as f:
+        json.dump(watchlist, f ,indent=4)
+
+@tasks.loop(seconds=10)
+async def auto_message():
+    try:
+        url = f"https://api.mcsrvstat.us/2/{MINECRAFT_SERVER_IP}"
+        response = requests.get(url)
+        data = response.json()
+        watchlist = get_watchlist()
+    except Exception as e:
+        print(f"An Error Has Occurred: {e}")
+    player_list = data.get("players", {}).get("list", [])
+    for player in player_list:
+        if player in watchlist:
+            for user_id in watchlist[player]:
+                user = await client.fetch_user(int(user_id))
+                try:
+                    embed = discord.Embed(title="Player is Online", color=discord.Color.dark_green())
+                    embed.add_field(name="", value=f"Player **{player}** is online", inline=False)
+                    embed.set_footer(text=f"<t:{int(t.time())}:R>")
+                    await user.send(embed=embed)
+                    await asyncio.sleep(0.1)
+                except Exception as e:
+                    print(f"An Error Has Occurred: {e}")
+                watchlist[player].remove(user_id)
+    save_watchlist(watchlist)
+
 @client.event
 async def on_ready():
+    global WHATCHLIST_FILE
+    WHATCHLIST_FILE = 'whatchlist.json'
+    if not os.path.exists(WHATCHLIST_FILE):
+        (WHATCHLIST_FILE, 'w').close()
     print(f"Bot is ready. Logged in as {client.user} (ID: {client.user.id})")
     await tree.sync(guild=discord.Object(id=GUILD_ID))
+    auto_message.start()
 
 # Commands
 @tree.command(name="ping", description="sends ping of bot", guild=discord.Object(id=GUILD_ID))
@@ -85,5 +129,16 @@ async def get_sever_info(interaction: discord.Interaction):
         await interaction.followup.send(embed=embed, file=file)
     await info_command(interaction)
     os.remove('server_icon.png')
+
+@tree.command(name="watch", description="DMs you when a certin player gets online", guild=discord.Object(id=GUILD_ID))
+async def watchlist(interaction: discord.Interaction, username: str):
+    user_id = str(interaction.user.id)
+    data = get_watchlist()
+    if username not in data:
+        data[username] = []
+    if username not in data[username]:
+        data[username].append(user_id)
+    save_watchlist(data)
+    await interaction.response.send_message(f'Pong!', ephemeral=True)
 
 client.run(BOT_TOKEN)
