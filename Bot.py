@@ -139,6 +139,6 @@ async def watchlist(interaction: discord.Interaction, username: str):
     if username not in data[username]:
         data[username].append(user_id)
     save_watchlist(data)
-    await interaction.response.send_message(f'Pong!', ephemeral=True)
+    await interaction.response.send_message(f"You’ll be notified in DMs when {username} logs on.", ephemeral=True)
 
 client.run(BOT_TOKEN)
