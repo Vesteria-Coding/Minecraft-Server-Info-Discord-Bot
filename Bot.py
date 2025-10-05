@@ -60,8 +60,8 @@ async def auto_message():
 @client.event
 async def on_ready():
     global WATCHLIST_FILE
-    WHATCHLIST_FILE = 'whatchlist.json'
-    if not os.path.exists(WHATCHLIST_FILE):
+    WATCHLIST_FILE = 'watchlist.json'
+    if not os.path.exists(WATCHLIST_FILE):
         (WATCHLIST_FILE, 'w').close()
     print(f"Bot is ready. Logged in as {client.user} (ID: {client.user.id})")
     await tree.sync(guild=discord.Object(id=GUILD_ID))
