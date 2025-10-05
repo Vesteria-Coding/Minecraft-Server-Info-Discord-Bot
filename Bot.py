@@ -48,6 +48,7 @@ async def auto_message():
                 try:
                     embed = discord.Embed(title="Player is Online", color=discord.Color.dark_green())
                     embed.add_field(name="", value=f"Player **{player}** is online", inline=False)
+                    embed.set_thumbnail(url=f"https://mc-heads.net/avatar/{player}")
                     await user.send(embed=embed)
                     await asyncio.sleep(0.1)
                 except Exception as e:
