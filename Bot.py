@@ -22,14 +22,14 @@ client = discord.Client(intents=intents)
 tree = discord.app_commands.CommandTree(client)
 
 def get_watchlist():
-    if not os.path.exists(WHATCHLIST_FILE):
+    if not os.path.exists(WATCHLIST_FILE):
         return {}
     else:
-        with open(WHATCHLIST_FILE, 'r') as f:
+        with open(WATCHLIST_FILE, 'r') as f:
             return json.load(f)
 
 def save_watchlist(watchlist):
-    with open(WHATCHLIST_FILE, "w") as f:
+    with open(WATCHLIST_FILE, "w") as f:
         json.dump(watchlist, f ,indent=4)
 
 @tasks.loop(seconds=10)
@@ -59,10 +59,10 @@ async def auto_message():
 
 @client.event
 async def on_ready():
-    global WHATCHLIST_FILE
+    global WATCHLIST_FILE
     WHATCHLIST_FILE = 'whatchlist.json'
     if not os.path.exists(WHATCHLIST_FILE):
-        (WHATCHLIST_FILE, 'w').close()
+        (WATCHLIST_FILE, 'w').close()
     print(f"Bot is ready. Logged in as {client.user} (ID: {client.user.id})")
     await tree.sync(guild=discord.Object(id=GUILD_ID))
     auto_message.start()
