@@ -5,7 +5,6 @@ import asyncio
 import discord
 import requests
 import argparse
-import time as t
 from discord.ext import tasks
 from dotenv import load_dotenv, dotenv_values
 from discord import app_commands, Interaction, Embed, File
@@ -32,7 +31,7 @@ def save_watchlist(watchlist):
     with open(WATCHLIST_FILE, "w") as f:
         json.dump(watchlist, f ,indent=4)
 
-@tasks.loop(seconds=10)
+@tasks.loop(minutes=1)
 async def auto_message():
     try:
         url = f"https://api.mcsrvstat.us/2/{MINECRAFT_SERVER_IP}"
@@ -49,7 +48,6 @@ async def auto_message():
                 try:
                     embed = discord.Embed(title="Player is Online", color=discord.Color.dark_green())
                     embed.add_field(name="", value=f"Player **{player}** is online", inline=False)
-                    embed.set_footer(text=f"<t:{int(t.time())}:R>")
                     await user.send(embed=embed)
                     await asyncio.sleep(0.1)
                 except Exception as e:
