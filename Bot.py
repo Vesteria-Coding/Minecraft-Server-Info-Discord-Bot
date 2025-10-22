@@ -1,6 +1,6 @@
 import os
-import json
 import base64
+import orjson
 import asyncio
 import discord
 import requests
@@ -24,19 +24,19 @@ def get_watchlist():
     if not os.path.exists(WATCHLIST_FILE):
         return {}
     else:
-        with open(WATCHLIST_FILE, 'r') as f:
-            return json.load(f)
+        with open(WATCHLIST_FILE, 'rb') as f:
+            return orjson.load(f)
 
 def save_watchlist(watchlist):
-    with open(WATCHLIST_FILE, "w") as f:
-        json.dump(watchlist, f ,indent=4)
+    with open(WATCHLIST_FILE, 'wb') as f:
+        f.write(orjson.dumps(watchlist, option=orjson.OPT_INDENT_2))
 
 @tasks.loop(minutes=1)
 async def auto_message():
     try:
         url = f"https://api.mcsrvstat.us/2/{MINECRAFT_SERVER_IP}"
         response = requests.get(url)
-        data = response.json()
+        data = orjson.loads(response.text)
         watchlist = get_watchlist()
     except Exception as e:
         print(f"An Error Has Occurred: {e}")
@@ -61,7 +61,7 @@ async def on_ready():
     global WATCHLIST_FILE
     WATCHLIST_FILE = 'watchlist.json'
     if not os.path.exists(WATCHLIST_FILE):
-        (WATCHLIST_FILE, 'w').close()
+        open(WATCHLIST_FILE, 'w').close()
     print(f"Bot is ready. Logged in as {client.user} (ID: {client.user.id})")
     await tree.sync(guild=discord.Object(id=GUILD_ID))
     auto_message.start()
@@ -78,7 +78,7 @@ async def get_sever_info(interaction: discord.Interaction):
     try:
         url = f"https://api.mcsrvstat.us/2/{MINECRAFT_SERVER_IP}"
         response = requests.get(url)
-        data = response.json()
+        data = response.orjson()
     except Exception as e:
         print(f"An Error Has Occurred: {e}")
 
